@@ -168,20 +168,45 @@ jQuery(function ($) {
 				$(e.target).data('abort', true).blur();
 			}
 		},
+
+		/**
+     * PROBLEM: If an edited value is blank and we press ESC, our todo item is
+     * deleted.
+     *
+     * EXPECTED BEHAVIOUR: Pressing the ESC button should discard any edits we
+     * make, irrespective of the edited value is blank or not.
+		 */
+
 		update: function (e) {
 			var el = e.target;
 			var $el = $(el);
 			var val = $el.val().trim();
 
-			if (!val) {
-				this.destroy(e);
-				return;
-			}
+	  /** 
+	   *	1. If the ESC key has been pressed, the `editKeyup` function adds a data
+     * 	attribute of `abort`. It acts as a flag. If this attribute exists, it
+     * 	means the user pressed ESC, so we should discard our edits and restore
+     * 	the original todo value. We essentially do nothing except reset our flag
+     *  by setting `data-abort` back to `false`.
+     */
 
-			if ($el.data('abort')) {
+			if ($el.data('abort')) { /* [1] */
 				$el.data('abort', false);
+
+				// Else, if ENTER key is pressed
 			} else {
-				this.todos[this.indexFromEl(el)].title = val;
+
+				// If edited value is empty, destroy this todo.
+				if (!val) {
+					this.destroy(e);
+					return;
+
+					// Else, the edited value is not empty
+				} else {
+
+					// Update the todo with the new edited value
+					this.todos[this.indexFromEl(el)].title = val;
+				}
 			}
 
 			this.render();
